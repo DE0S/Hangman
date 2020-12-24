@@ -32,10 +32,20 @@ public class Dictionary{
                     contents.append(line);
                     contents.append(System.getProperty("line.separator"));
                 }
-                if(line.length() == 3 && Hangman.easyWordsStart == 0) ///If the words are minimum 
+
+                if(line.length() == 4 && Hangman.easyWordsStart == 0) ///If the words are minimum length of 3 and var has not been assigned yet
                 {
-                    
+                    Hangman.easyWordsStart  = i;
                 }
+                else if(line.length() == 6 && Hangman.mediumWordsStart == 0)
+                {
+                    Hangman.mediumWordsStart = i;
+                }
+                else if(line.length() == 9 && Hangman.hardWordsStart == 0)
+                {
+                    Hangman.hardWordsStart  = i;
+                }
+
                 i++;
             }
         }catch (FileNotFoundException ex){

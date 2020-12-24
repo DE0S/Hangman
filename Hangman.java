@@ -2,10 +2,8 @@
 7 Lives
 
 TO DO;
--Add lose condition
--Difficulties
--Print out Hangman ASCII for every incorrect guess
--Letters already guessed
+-Top of Hangman not printing
+-Words not showing correctly
 
 Difficulty settings
 */
@@ -15,9 +13,9 @@ import java.util.*;
 public class Hangman
 {
     private static String[] allWords;
-    private static String chosenWord;
-    private static String guessedWord;
-    private static boolean gameOver;
+    private static String chosenWord = "";
+    private static String guessedWord = "";
+    private static boolean gameOver = false;
     private static int health = 7;
     private static String allGuessedLetters = "";
     ///0 = Easy, 1 = Medium, 2 = Hard
@@ -27,9 +25,37 @@ public class Hangman
 
     public static void main(String args[])
     {
+        ResetVars();
         Scanner sc = new Scanner(System.in);
-            
-        GameSetup(0);
+
+        System.out.println("Please choose difficulty: Easy, Medium, Hard");
+        boolean difficultySelected = false;
+
+        while(!difficultySelected)
+        {
+            String difficultyInput = sc.nextLine();
+            difficultyInput = difficultyInput.toLowerCase();
+
+            if(difficultyInput.equals("easy"))
+            {
+                difficultySelected = true;
+                GameSetup(0);   
+            }
+            else if(difficultyInput.equals( "medium"))
+            {
+                difficultySelected = true;
+                GameSetup(1);
+            }
+            else if(difficultyInput.equals("hard"))
+            {
+                difficultySelected = true;
+                GameSetup(2);
+            }
+            else
+            {
+                System.out.println("Please only use inputs as required above" );
+            }
+        }
 
         //Let the player keep guessing until the game is over
         while(!gameOver)
@@ -37,23 +63,22 @@ public class Hangman
             Guess(sc.nextLine());
         }
 
-        sc.close();
-
         ///End game state
         if(guessedWord.equals(chosenWord))
         {
-            System.out.println();
-            System.out.println();
             System.out.println(".:::: Congrats, you win! ::::.");
         }
         else
         {
-            System.out.println();
-            System.out.println();
             System.out.println(".:::: Game Over :( ::::.");
         }
 
+        RetrySetup();
+
     }
+
+
+
 
     ///Method to initally set up the game based on inputted parameters
     public static void GameSetup(int difficulty)
@@ -65,7 +90,6 @@ public class Hangman
 
         ///Generate random word based on given range
         Random r = new Random();
-        
         ///Pick word based on selected difficulty above
         switch(difficulty)
         {
@@ -73,7 +97,6 @@ public class Hangman
                 //                              (Max Value)       + Min Value
                 chosenWord = allWords[r.nextInt(mediumWordsStart-1) + easyWordsStart];   ///Chose random word in given range, starting at pos 120
             break;
-
 
             case 1:///Medium
                 chosenWord = allWords[r.nextInt(hardWordsStart-1) + mediumWordsStart];
@@ -86,7 +109,7 @@ public class Hangman
         
         chosenWord = chosenWord.toLowerCase();
         
-        System.out.println(chosenWord); ///For debugging
+        System.out.println("The word is " + chosenWord); ///For debugging
         
         ///Change guessedword to only contain "_" characters
         guessedWord = chosenWord.replaceAll("[A-Za-z]", "_");
@@ -125,14 +148,14 @@ public class Hangman
                     guessedWord = guessedWord.substring(0,i) + chosenWord.charAt(i) + guessedWord.substring(i+1);
                 }
             }
-            System.out.println();
+
             System.out.println(guessedWord);
         }
         else///Else if an incorrect character was guessed
         {
             allGuessedLetters += guessedChar + " ";
             health-=1;
-            System.out.println();
+    
             System.out.println("Wrong! Lives Left: " + health);
             ShowLives(7 - health);
             System.out.println("Guessed Letters: " + allGuessedLetters);
@@ -164,7 +187,54 @@ public class Hangman
         }
     }
 
-    //Sort all allWords in array by length, shortest -> longest
+
+        //Method to handle if user wants to retry the game or not
+        public static void RetrySetup()
+        {
+            Scanner sc = new Scanner(System.in);
+            boolean retrySelected = false;
+            System.out.println("Play again? Y N");
+
+            while(!retrySelected)
+            {
+                String input = sc.nextLine();
+                input = input.toLowerCase();
+    
+                if(input.equals("y") || input.equals("yes"))
+                {
+                    retrySelected = true;
+                    main(null); ///Call main method again
+                }
+                else if(input.equals("n") || input.equals( "no"))
+                {
+                    System.out.println("Goodbye");
+                    retrySelected = true;
+                    sc.close();
+                    return; ///Terminate program if user no longer wants to play
+                }
+                else 
+                {
+                    System.out.println("Please only use inputs as required above");
+                }
+            }
+        }
+    
+
+
+    ///Method resetting variables to their original state
+    public static void ResetVars()
+    {
+            chosenWord = "";
+            guessedWord = "";
+            gameOver = false;
+            health = 7;
+            allGuessedLetters = "";
+            easyWordsStart = 0;
+            mediumWordsStart = 0;
+            hardWordsStart = 0;
+    }
+
+    //Sort all Words in array by length, shortest -> longest
     ///Bitta Merge Sort
     public static void MergeAlgo(int p, int q, int r) 
     {
