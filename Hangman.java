@@ -1,14 +1,15 @@
 /*
- * --------Make sure to change path of Words.txt to your directory (at end of file) --------------
+ * --------Make sure to change path of Words.txt to your directory if not connected to network (at end of file) --------------
  * 
  * 
- * Hangman game with an option of 1 player or 2 players.
+ * classic game of Hangman played against Computer or another player.
  * 
  * @author Deividas Ovsianikovas
  */
 
 import java.io.*;
 import java.util.*;
+import java.net.*;
 
 public class Hangman
 {
@@ -205,10 +206,11 @@ public class Hangman
                       /// the player wins, loses otherwise
                       if (guessedWord.equals(chosenWord))
                       {
-                          System.out.println("...:::: Congrats, you win! ::::...");
+                            System.out.println("...:::: Congrats, you win! ::::...");
                       } else
                       {
-                          System.out.println("...:::: Game Over :( ::::...");
+                            System.out.println("The word was: " + chosenWord);
+                            System.out.println("...:::: Game Over :( ::::...");
                       }
               
                       /// Ask if player wants to play again/quit
@@ -265,7 +267,7 @@ public class Hangman
             break;
 
         case 2:/// Hard
-            chosenWord = allWords[r.nextInt(allWords.length - 1) + hardWordsStart];
+            chosenWord = allWords[r.nextInt(hardWordsStart + 10000) + hardWordsStart];//Using +10000 as using allWords.length as the upper limit produces errors
             break;
         }
 
@@ -276,9 +278,7 @@ public class Hangman
         /// Change guessedword to only contain "_" characters
         guessedWord = chosenWord.replaceAll("[A-Za-z]", "_");
         System.out.println(guessedWord);
-        System.out.println("Word Length: " + (guessedWord.length())); /// Show the player how
-                                                                          /// many characters are in
-                                                                          /// the word
+        System.out.println("Word Length: " + (guessedWord.length())); /// Show the player how many characters are in the word
     }
 
 
@@ -329,8 +329,9 @@ public class Hangman
             health -= 1;
 
             System.out.println("Wrong! Lives Left: " + health);
-            ShowLives(8 - health); /// 8 - health as 8 is the starting health
+            ShowLives(8 - health); /// 8 - health as 8 is the stnarting health
             System.out.println("Guessed Letters: " + allGuessedLetters);
+            System.out.println("Your word: " + guessedWord);
         }
 
         /// End the game if the player guessed word equals the computer chosen word or
@@ -395,7 +396,7 @@ public class Hangman
         allGuessedLetters = "";
     }
 
-    // Method so we would not have to keep writing if("yes") clauses, takes up less
+    // Helper method so we would not have to keep writing if("yes") clauses, takes up less
     // memory & time
     public static boolean YesNoAnswer()
     {
@@ -504,11 +505,20 @@ class Dictionary
 
     public Dictionary()
     {
-        input = load("C:\\Users\\Deivid\\Documents\\AnotherHangmanProjectCS210\\words.txt"); /// <--------------Insert
-                                                                                             /// path
-                                                                                             /// to
-                                                                                             /// words.txt
-                                                                                             /// doc-----------
+        ///Trying to connect to website containing file
+        try
+        {
+            URL u = new URL("http://deividasovs.com/assets/College/words.txt");
+            HttpURLConnection huc =  ( HttpURLConnection )  u.openConnection (); 
+            huc.connect () ; ///This will fail if not connected
+            input = load("http://deividasovs.com/assets/College/words.txt", true);
+
+        }
+        catch(Exception e)
+        {
+            input = load("C:\\Users\\Deivid\\Documents\\AnotherHangmanProjectCS210\\words.txt", false); /// <--------------Insert path to words.txt file
+            System.out.println("Not connected to internet, trying to find local file");
+        }
     }
 
     public int getSize()
@@ -521,20 +531,29 @@ class Dictionary
         return input[n];
     }
 
-    private String[] load(String file)
+    private String[] load(String file, boolean isOnline)
     {
-        File aFile = new File(file);
+        File aFile = new File(file.toString());   
         StringBuffer contents = new StringBuffer();
         BufferedReader input = null;
         try
         {
-            input = new BufferedReader(new FileReader(aFile));
+            //If everything is good from the network, get file from website
+            if(isOnline)
+            {
+                URL url = new URL(file);
+                input = new BufferedReader(new InputStreamReader(url.openStream()));
+            }
+            else
+            {
+                input = new BufferedReader(new FileReader(aFile));
+            }
+
             String line = null;
             input.skip(120); /// First Few lines seem like nonsense, do not use
             while ((line = input.readLine()) != null)
             {
-                if (line.matches("[A-Za-z]+")) //// Only include english language characters, no
-                                               //// symbols
+                if (line.matches("[A-Za-z]+")) //// Only include english language characters, no symbols
                 {
                     contents.append(line);
                     contents.append(System.getProperty("line.separator"));
